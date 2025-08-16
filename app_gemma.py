@@ -1,12 +1,11 @@
 import os
-import shutil
 import tempfile
 import streamlit as st
 import pdfplumber
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import FAISS
 from langchain.docstore.document import Document
 
 # Google Gemini (AI Studio) SDK
@@ -22,7 +21,7 @@ st.title("📄 Document Q&A — Gemini (Google AI Studio)")
 
 # ✅ Load API Key (Secrets.toml for cloud, .env for local)
 GOOGLE_API_KEY = None
-if "GOOGLE_API_KEY" in st.secrets:
+if hasattr(st, "secrets") and "GOOGLE_API_KEY" in st.secrets:
     GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 else:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -39,15 +38,6 @@ model = genai.GenerativeModel(GEMINI_MODEL_NAME)
 uploaded_file = st.file_uploader("Upload a PDF or TXT file", type=["pdf", "txt"]) 
 
 if uploaded_file:
-    persist_dir = "rag_chroma_store"
-
-    # ----- Remove old vector store safely -----
-    if os.path.exists(persist_dir):
-        try:
-            shutil.rmtree(persist_dir, ignore_errors=True)
-        except Exception as e:
-            st.warning(f"Could not clear old store: {e}")
-
     # ----- Save uploaded file temporarily -----
     temp_dir = tempfile.TemporaryDirectory()
     file_path = os.path.join(temp_dir.name, uploaded_file.name)
@@ -82,13 +72,13 @@ if uploaded_file:
     chunks = splitter.split_text(text)
     docs = [Document(page_content=chunk) for chunk in chunks]
 
-    # ----- Embeddings & Vectorstore -----
-    with st.spinner("🔎 Building embeddings (first time may take a minute)…"):
+    # ----- Embeddings & Vectorstore (FAISS instead of Chroma) -----
+    with st.spinner("🔎 Building FAISS index (first time may take a minute)…"):
         embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        vectorstore = Chroma.from_documents(documents=docs, embedding=embedding_model, persist_directory=persist_dir)
+        vectorstore = FAISS.from_documents(docs, embedding_model)
 
     # ----- Retriever -----
-    retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 3, "lambda_mult": 0.3})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
     st.success("✅ File processed successfully — ask your question 👇")
     query = st.text_input("Enter your question:")
