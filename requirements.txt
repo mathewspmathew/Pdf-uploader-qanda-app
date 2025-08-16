@@ -1,0 +1,7 @@
+streamlit
+pdfplumber
+langchain
+langchain-community
+chromadb
+sentence-transformers
+google-generativeai

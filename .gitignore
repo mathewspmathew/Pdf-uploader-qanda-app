@@ -1,0 +1,8 @@
+/test.ipynb
+/test2.ipynb
+/google
+
+.vscode/*
+!.vscode/settings.json
+
+/.ipynb_checkpoints
