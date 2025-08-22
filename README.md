@@ -26,3 +26,5 @@ Inside app.py, I am using google/flan-t5-base model as the LLM.
 For a detailed walkthrough of building a local RAG app with Google Gemma 1B, check out the following article:
 
 [Building a Local RAG App with Google Gemma 1B](https://medium.com/@mathewsparan/building-a-local-rag-app-with-google-gemma-1b-d6e1064b852c) – an excellent guide covering the architecture, tool choices, and workflow behind a similar implementation.
+
+<img width="1799" height="721" alt="Screenshot 2025-08-16 184119" src="https://github.com/user-attachments/assets/ee6e9226-fe9d-4ace-b347-7672af8834ef" />
